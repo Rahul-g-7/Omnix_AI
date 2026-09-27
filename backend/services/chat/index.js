@@ -15,7 +15,11 @@ app.get("/",(req,res)=>{
     res.send("hello from chat service")
 })
 
-app.listen(PORT, () => {
-    console.log(`chat is running on port ${PORT}`);
-    connectDB()
-});
+
+const startServer = async () => {
+    await connectDB();
+    app.listen(PORT, () => {
+        console.log(`Chat service running on port ${PORT}`);
+    });
+};
+startServer()
