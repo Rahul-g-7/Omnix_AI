@@ -1,13 +1,11 @@
 import React from 'react';
 
 const MessageBubble = ({role,content}) => {
+    const isUser=role=="user"
     return (
-        <div className="flex items-start gap-3">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0
-        ${role ==='user' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
-         'bg-white/[0.05] text-slate-300 border border-white/[0.07]'
-        }`}>
-           
+        <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+        <div className={`max-w-[72%] px-4 py-2.5 rounded-2xl text-[13.5px] leading-relaxed ${isUser ? "bg-linear-to-br from-indigo-500 to-violet-700 text-white rounded-tr-sm" : "bg-white/[0.04] border border-white/[0..07]  text-slate-300 rounded-tl-sm"} `}>
+            {content}
         </div>
            
         </div>
