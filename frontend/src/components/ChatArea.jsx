@@ -16,6 +16,7 @@ const ChatArea = () => {
             }
             
         }
+        getMesg()
     },[selectedConversation])
     return (
         <div className='flex-1 flex flex-col'>
