@@ -90,7 +90,7 @@ const SideBar = () => {
                     <div onClick={()=>{setCollapse(true)}} className='hidden lg:flex items-center gap-2.5 justify-center h-7 w-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.07] transition-colors duration-150 bg-transparent border-none cursor-pointer'>
                         <PanelLeftIcon /> 
                     </div>
-                    <span className='text-[15px] font-semibold text-slate-100 tracking-tight flex-1'>CortexAI</span>
+                    <span className='text-[15px] font-semibold text-slate-100 tracking-tight flex-1'>OmnixAI</span>
                     <span className='text-[12px] font-medium text-indigo-400 border bg-indigo-500/10 border-indigo-500/30 px-2 py-0.5 rounded-full tracking-wide'>free</span>
                     <button className='flex items-center justify-center h-7 w-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.07] transition-colors duration-150 bg-transparent border-none cursor-pointer' onClick={()=>dispatch(setSelectedConversation(null))}>
                         <PenSquare/>

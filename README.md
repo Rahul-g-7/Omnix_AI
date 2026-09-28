@@ -1,4 +1,4 @@
-# 🧠 Cortex AI
+# 🧠 Omnix AI
 
 <div align="center">
 
@@ -25,7 +25,7 @@
 
 ## 📌 Project Overview
 
-**Cortex AI** is an advanced AI assistant and multi-agent execution platform built on top of a scalable, decoupled microservices architecture:
+**Omnix AI** is an advanced AI assistant and multi-agent execution platform built on top of a scalable, decoupled microservices architecture:
 - **Centralized API Gateway:** A single entry point that manages CORS, cookie authentication, Redis session validation, and transparent reverse proxy routing with downstream identity injection (`x-user-id`).
 - **Distributed Session Authentication:** Firebase Admin verification paired with secure Redis sessions (7-day TTL) and HTTP-only cookies.
 - **Dedicated Chat Service:** MongoDB-backed conversation and message persistence, managing chat histories, title renaming, and thread metadata.
@@ -129,7 +129,7 @@ flowchart LR
 ## 📂 Project Structure
 
 ```text
-cortex_ai/
+Omnix_AI/
 ├── backend/
 │   ├── docker-compose.yml              # Docker Compose for Redis (Port 6379)
 │   ├── package.json

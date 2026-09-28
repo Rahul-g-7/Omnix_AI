@@ -4,7 +4,7 @@ import { getMemory } from "../config/memory.js";
 export const chatAgent = async (state) => {
   const llm = await getModel("chat");
   const history =await getMemory(state.conversationId)
-  const systemPrompt = `You are CortexAI and you are a chat Assitant
+  const systemPrompt = `You are OmnixAI and you are a chat Assitant
   Rules:
   -for greetings don't use markdown formatting and respond naturally 
   -for detailed answers, code, explanations, and structured responses use markdown formatting

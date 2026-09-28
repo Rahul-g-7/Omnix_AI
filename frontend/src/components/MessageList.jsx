@@ -9,7 +9,7 @@ const MessageList = () => {
             {messages.length==0 || !selectedConversation?(
                 <div className='h-full flex flex-col items-center justify-center gap-4 text-center '>
                     <div className='flex flex-col gap-1.5'>
-                        <h1 className='text-[22px] font-extrabold text-slate-100 tracking-tight'>CortexAI</h1>
+                        <h1 className='text-[22px] font-extrabold text-slate-100 tracking-tight'>OmnixAI</h1>
                         <p className='text-[17px] font-semibold text-slate-400 tracking-tight'>How can I help you?</p>
                         <p className='text-slate-500/70 text-[15px] text-slate-600 max-w-[260px] leading-relaxed'>Ask me anything - code, ideas, explanatons, or just a quick question.</p>
                     </div>
