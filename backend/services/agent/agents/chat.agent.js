@@ -1,7 +1,10 @@
+import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { getModel } from "../config/llmModels.js";
+import { getMemory } from "../config/memory.js";
 export const chatAgent = async (state) => {
   const llm = await getModel("chat");
-  const prompt = `You are CortexAI and you are a chat Assitant
+  const history =await getMemory(state.conversationId)
+  const systemPrompt = `You are CortexAI and you are a chat Assitant
   Rules:
   -for greetings don't use markdown formatting and respond naturally 
   -for detailed answers, code, explanations, and structured responses use markdown formatting
@@ -17,16 +20,21 @@ export const chatAgent = async (state) => {
   - Use bullet points for lists
   - Use headings for sections
   `;
-  const response = await llm.invoke([
-    {
-      role: "system",
-      content: prompt,
-    },
-    {
-      role: "user",
-      content: state.prompt,
-    },
-  ]);
+    const messages=[
+      new SystemMessage(systemPrompt)
+    ]
+    history.forEach(msg=>{
+      if(msg.role=="user"){
+        messages.push(new HumanMessage(msg.content))
+      }
+      else if(msg.role=="assistant"){
+        messages.push(new AIMessage(msg.content))
+      }
+    })
+    messages.push(new HumanMessage(state.prompt))
+    console.log(messages)
+
+  const response = await llm.invoke(messages);
   return {
     ...state,
     aiResponse: response.content,
