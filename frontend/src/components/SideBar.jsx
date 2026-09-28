@@ -45,7 +45,7 @@ const SideBar = () => {
             </button>
             <button
               className="flex items-center gap-2.5 justify-center h-10 w-10 rounded-xl text-slate-500 hover:text-slate-200 hover:bg-white/[0.07] transition-colors duration-150 bg-transparent border-none cursor-pointer"
-              onClick={handleCreateConversation}
+              onClick={()=>{dispatch(setSelectedConversation(null))}}
             >
               <Plus size={18} />
             </button>
@@ -92,12 +92,12 @@ const SideBar = () => {
                     </div>
                     <span className='text-[15px] font-semibold text-slate-100 tracking-tight flex-1'>CortexAI</span>
                     <span className='text-[12px] font-medium text-indigo-400 border bg-indigo-500/10 border-indigo-500/30 px-2 py-0.5 rounded-full tracking-wide'>free</span>
-                    <button className='flex items-center justify-center h-7 w-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.07] transition-colors duration-150 bg-transparent border-none cursor-pointer' onClick={handleCreateConversation}>
+                    <button className='flex items-center justify-center h-7 w-7 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.07] transition-colors duration-150 bg-transparent border-none cursor-pointer' onClick={()=>{dispatch(setSelectedConversation(null))}}>
                         <PenSquare/>
                     </button>
                 </div>
                 <div className='px-4 pt-4 pb-1'>
-                    <button className='w-full flex items-center gap-2 justify-center rounded-xl text-white font-medium bg-linear-to-br from-indigo-500 to-violet-600 py-[10px] border-none hover:opacity-90 transition-opacity duration-150 cursor-pointer'onClick={handleCreateConversation}>
+                    <button className='w-full flex items-center gap-2 justify-center rounded-xl text-white font-medium bg-linear-to-br from-indigo-500 to-violet-600 py-[10px] border-none hover:opacity-90 transition-opacity duration-150 cursor-pointer'onClick={()=>{dispatch(setSelectedConversation(null))}}>
                         <Plus size={16}/>
                         New Chat 
                     </button>
