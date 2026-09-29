@@ -4,7 +4,13 @@ import { getMemory } from "../config/memory.js";
 export const chatAgent = async (state) => {
   const llm = await getModel("chat");
   const history =await getMemory(state.conversationId)
+  const searchContext=state.searchResults?` web serach results :${JSON.stringify(state.searchResults)} answer the user using the above search results`:""
   const systemPrompt = `You are OmnixAI and you are a chat Assitant
+  ${searchContext}
+  if searchContext exists:
+  -use search results to answer the user query
+  -don't use internal tools.
+  
   Rules:
   -for greetings don't use markdown formatting and respond naturally 
   -for detailed answers, code, explanations, and structured responses use markdown formatting
