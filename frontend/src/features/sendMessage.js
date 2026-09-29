@@ -7,7 +7,7 @@ async function sendMessage(payload){
         return data
     } catch (error) {
         console.log(error)
-        return []
+        return error.response?.data?.message || "Failed to get response from server."
     }
 }
 export default sendMessage
