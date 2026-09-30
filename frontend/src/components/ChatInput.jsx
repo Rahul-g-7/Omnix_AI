@@ -60,8 +60,8 @@ const ChatInput = () => {
     dispatch(
       addMessage({
         role: "assistant",
-        content: data.answer,
-        images: data.images,
+        content: data?.answer,
+        images: data?.images,
       }),
     );
     console.log("data", data);
