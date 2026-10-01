@@ -74,8 +74,42 @@ export const codingAgent = async (state) => {
             ${state.prompt}
             `;
 
-            const res=await llm.invoke(prompt)
-            console.log(res.content);
-
+    const res = await llm.invoke(prompt);
+    const data = JSON.parse(res.content);
+    return {
+      ...state,
+      aiResponse: "Code Generated Succesfully.",
+      artifacts: [
+        {
+          id: Date.now(),
+          type: "Project",
+          files: data.files || [],
+        },
+      ],
+    };
   }
+  const res = await llm.invoke(`
+    ${intent}
+    Return Markdown only.
+
+    Never generate project files.
+
+    use heaadings like:
+    # overview
+    ## Explaination
+    # problems
+    ## Improvemts 
+    ## best Practices 
+    ## optimized code (if needed)
+
+    user Request:
+    ${state.prompt}
+    
+    `);
+  const data = res.content;
+  return {
+    ...state,
+    aiResponse: data,
+    artifacts: [],
+  };
 };
