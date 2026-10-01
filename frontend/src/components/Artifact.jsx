@@ -8,6 +8,7 @@ import {
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { easeInOut, motion, transform } from "motion/react";
+import Editor from "@monaco-editor/react";
 const Artifact = () => {
   const [collapse, setCollapse] = useState(false);
   const [tab, setTab] = useState("code");
@@ -16,7 +17,7 @@ const Artifact = () => {
   if (artifacts.length === 0) {
     return;
   }
-  const file = artifacts[0]?.files[activeFile]?.content;
+  const file = artifacts[0]?.files?.[activeFile]
   const htmlFile=artifacts[0]?.files?.find(f=>f.name==="index.html")
   const jsFile=artifacts[0]?.files?.find(f=>f.name==="script.js")
   const cssFile=artifacts[0]?.files?.find(f=>f.name==="style.css")
@@ -28,18 +29,66 @@ const Artifact = () => {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>${cssFile.content || ""}</style>
+    <style>${cssFile?.content || ""}</style>
   </head>
   <body>
     ${htmlFile?.content || ""}
-    <script>${jsFile.content || ""}</script>
+    <script>${jsFile?.content || ""}</script>
   </body>
   </html>
   `;
+  const detectLanguage=(filename="")=>{
+    const name=filename.toLowerCase()
+    if(name.endsWith(".html"))
+      return "html";
+    if(name.endsWith(".css"))
+      return "css";
+    if(name.endsWith(".js"))
+      return "javascript";
+    if(name.endsWith(".ts"))
+      return "typescript";
+    if(name.endsWith(".jsx"))
+      return "javascript";
+    if(name.endsWith(".tsx"))
+      return "typescript";
+    if(name.endsWith(".json"))
+      return "json";
+    if(name.endsWith(".py"))
+      return "python";
+    if(name.endsWith(".java"))
+      return "java";
+    if(name.endsWith(".c"))
+      return "c";
+    if(name.endsWith(".cpp"))
+      return "cpp";
+    if(name.endsWith(".h"))
+      return "c";
+    if(name.endsWith(".hpp"))
+      return "cpp";
+    if(name.endsWith(".py"))
+      return "python";
+    if(name.endsWith(".rb"))
+      return "ruby";
+    if(name.endsWith(".go"))
+      return "go";
+    if(name.endsWith(".rs"))
+      return "rust";
+    if(name.endsWith(".php"))
+      return "php";
+    if(name.endsWith(".swift"))
+      return "swift";
+    if(name.endsWith(".kt"))
+      return "kotlin";
+    if(name.endsWith(".kts"))
+      return "kotlin";
+    if(name.endsWith(".dart"))
+      return "dart";
+    return "plaintext";
+  }
   return (
     <motion.div
-      initial={{ width: 350 }}
-      animate={{ width: collapse ? 48 : 350 }}
+      initial={{ width: 400 }}
+      animate={{ width: collapse ? 48 : 400 }}
       transition={{ duration: 0.25, ease: easeInOut }}
       className="hidden lg:flex h-full border-l border-white/[0.06] flex-col overflow-hidden shrink-0 w-[250px]"
     >
@@ -106,14 +155,23 @@ const Artifact = () => {
               animate={{opacity:1}}
               transform={{duration:0.15,ease:easeInOut}}
               className="h-full w-full">
-                  <iframe title="preview" srcDoc={previewDoc} sandbox="allow-script" className="w-full h-full bg-white border-none outline-none"></iframe>
+                  <iframe title="preview" srcDoc={previewDoc} sandbox="allow-scripts" className="w-full h-full bg-white border-none outline-none"></iframe>
               </motion.div>
             :
             <motion.div 
-              initial={{}}
-              animate={{}}
-              transform={{}}>
-                
+              initial={{opacity:0}}
+              animate={{opacity:1}}
+              transform={{duration:0.15,ease:easeInOut}}
+              className="h-full w-full">
+                <Editor theme="vs-dark"
+                language={detectLanguage(file?.name)}
+                value={file?.content}
+                options={{
+                  readOnly:true,minimap:{enabled:false,}, fontSize:13, wordWrap:"on", automaticLayout:true,scrollBeyondLastLine:false,padding:{top:16},lineNumbers:"on",renderLineHighlight
+                  :"none"
+                  
+                }}
+                />
               </motion.div>
             }
               

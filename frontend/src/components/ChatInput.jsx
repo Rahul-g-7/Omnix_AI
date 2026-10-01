@@ -14,7 +14,7 @@ import React, { useState } from "react";
 import sendMessage from "../features/sendMessage";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { addMessage, setMessages } from "../redux/messageSlice";
+import { addMessage, setMessages ,setArtifacts} from "../redux/messageSlice";
 import { createConversation } from "../features/createConversation";
 import {
   addConversation,

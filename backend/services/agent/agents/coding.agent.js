@@ -41,20 +41,28 @@ export const codingAgent = async (state) => {
             -Beautiful spacing
             -Single page unless the user asks otherWise.
 
+            Images: 
+            - If the project needs images, use real images from Unsplash. 
+            - Use direct Unsplash image URLs from images.unsplash.com. 
+            - Choose images relevant to the user's request. 
+            - Do not use fake, broken, placeholder, or invented image URLs. 
+            - If images are not needed, do not add them.
+      
+
             Return ONLY vaalid JSON.
 
             Schema:{
             "files":[
             {
-            "name":"index.html,
+            "name":"index.html",
             "content":"..."
             },
             {
-            "name":"style.css,
+            "name":"style.css",
             "content":"..."
             },
             {
-            "name":"script.js,
+            "name":"script.js",
             "content":"..."
             },
             ]
@@ -75,7 +83,15 @@ export const codingAgent = async (state) => {
             `;
 
     const res = await llm.invoke(prompt);
-    const data = JSON.parse(res.content);
+    console.log(res.content);
+    let content = res.content.trim();
+
+// Remove markdown code fences if the model adds them
+content = content.replace(/^```json\s*/i, "");
+content = content.replace(/^```\s*/i, "");
+content = content.replace(/\s*```$/i, "");
+
+const data = JSON.parse(content);
     return {
       ...state,
       aiResponse: "Code Generated Succesfully.",
@@ -84,7 +100,7 @@ export const codingAgent = async (state) => {
           id: Date.now(),
           type: "Project",
           files: data.files || [],
-          title:state.prompt
+          title: state.prompt,
         },
       ],
     };
