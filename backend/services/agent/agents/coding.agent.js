@@ -21,7 +21,7 @@ export const codingAgent = async (state) => {
         `);
   const intent = intentRes.content;
   if (intent == "CODE_GENERATION") {
-    const prompt = `You are OmnixAI coding agent.
+    const prompt = `You are Senior software engineer .
             generate the requested project.
             Define stack:
             -HTML
@@ -84,6 +84,7 @@ export const codingAgent = async (state) => {
           id: Date.now(),
           type: "Project",
           files: data.files || [],
+          title:state.prompt
         },
       ],
     };
