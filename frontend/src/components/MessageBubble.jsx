@@ -66,6 +66,17 @@ const MessageBubble = ({ role, content, images }) => {
                 {children}
               </a>
             ),
+            img:({src,alt})=>{
+              if(!src) return null;
+              return(
+              <img
+                src={src}
+                loading="lazy"
+                onClick={() => setLightBox(src)}
+                onError={(e) => e.currentTarget.remove()}
+                className="w-60 h-50 rounded-xl border-white/10 cursor-zoom-in object-cover hover:opacity-90 tranistion" />
+              )
+            },
             ul: ({ children }) => (
               <ul className="pl-6 my-3 list-disc space-y-1">{children}</ul>
             ),
