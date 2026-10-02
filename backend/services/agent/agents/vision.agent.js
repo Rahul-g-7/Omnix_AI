@@ -35,7 +35,7 @@ export const visionAgent = async (state) => {
     const buffer = Buffer.from(imageRes.data);
     const filename = `image-${Date.now()}.png`;
     const file = await uploadToS3(filename, buffer, "image/png");
-    const downloadUrl = await getFromS3(filename, 60 * 24);
+    const downloadUrl = await getFromS3(filename, 60 * 60 * 24);
     return {
       ...state,
       aiResponse: `## Image Generated Successfully 

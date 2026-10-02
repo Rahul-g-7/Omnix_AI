@@ -39,7 +39,7 @@ export const pdfAgent = async (state) => {
     const pdfBuffer = await generatePdf(data);
     const filename = `pdf-${Date.now()}.pdf`;
     await uploadToS3(filename, pdfBuffer, "application/pdf");
-    const downloadUrl = await getFromS3(filename, 60 * 24);
+    const downloadUrl = await getFromS3(filename, 60 * 60 * 24);
 
     return {
       ...state,
