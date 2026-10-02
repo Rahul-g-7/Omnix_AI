@@ -61,6 +61,11 @@ const MessageBubble = ({ role, content, images }) => {
             p: ({ children }) => (
               <p className="mb-3 whitespace-pre-wrap break-word">{children}</p>
             ),
+            a: ({href, children }) => (
+              <a href={href} className="text-indigo-400 hover:underline">
+                {children}
+              </a>
+            ),
             ul: ({ children }) => (
               <ul className="pl-6 my-3 list-disc space-y-1">{children}</ul>
             ),
@@ -76,11 +81,7 @@ const MessageBubble = ({ role, content, images }) => {
             pre: ({ children }) => (
               <pre className="bg-white/[0.08] p-2 rounded-md">{children}</pre>
             ),
-            a: ({ children }) => (
-              <a href={children} className="text-indigo-400 hover:underline">
-                {children}
-              </a>
-            ),
+            
             hr: ({ children }) => <hr className="my-3" />,
             table: ({ children }) => (
               <table className="my-3 border-collapse w-full">{children}</table>
