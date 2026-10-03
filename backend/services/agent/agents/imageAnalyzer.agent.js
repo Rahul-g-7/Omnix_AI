@@ -1,8 +1,11 @@
 import { getModel } from "../config/llmModels.js";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import fs from "fs";
+import { deductCredits } from "../utils/deductCredits.js";
+
 export const imageAnalyzer = async (state) => {
   try {
+    await deductCredits(state.userId,"vision")
     const llm = await getModel("imageAnalyzer");
     const imageBuffer = fs.readFile(state.file.path);
     const base64 = imageBuffer.toString("base64");
