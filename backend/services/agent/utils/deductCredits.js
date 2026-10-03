@@ -6,6 +6,7 @@ export const deductCredits=async (userId,agent)=>{
         return data;
     }catch(error){
         console.log(error);
-        return []
+        const errorMsg = error.response?.data?.message || "Insufficient credits";
+        throw new Error(errorMsg);
     }
 }

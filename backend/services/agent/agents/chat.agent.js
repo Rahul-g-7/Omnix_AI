@@ -9,6 +9,8 @@ import { deductCredits } from "../utils/deductCredits.js";
 
 export const chatAgent = async (state) => {
   try {
+    await deductCredits(state.userId, "chat");
+
     const llm = await getModel("chat");
     const history = (await getMemory(state.conversationId)) || [];
     const searchContext = state.searchResults
@@ -51,7 +53,6 @@ export const chatAgent = async (state) => {
     console.log(messages);
 
     const response = await llm.invoke(messages);
-    await deductCredits(state.userId, "chat");
 
     return {
       ...state,

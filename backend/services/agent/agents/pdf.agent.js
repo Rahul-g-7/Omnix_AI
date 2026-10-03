@@ -6,6 +6,8 @@ import { deductCredits } from "../utils/deductCredits.js";
 
 export const pdfAgent = async (state) => {
   try {
+    await deductCredits(state.userId, "pdf");
+
     const llm = await getModel("pdf");
     const prompt = `
         You are expert document writer.
@@ -36,7 +38,6 @@ export const pdfAgent = async (state) => {
       : ${state.prompt}
         `;
     const res = await llm.invoke(prompt);
-    await deductCredits(state.userId, "pdf");
     const data = JSON.parse(res.content);
     const pdfBuffer = await generatePdf(data);
     const filename = `pdf-${Date.now()}.pdf`;

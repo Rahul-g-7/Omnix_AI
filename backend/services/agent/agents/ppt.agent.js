@@ -6,6 +6,7 @@ import { deductCredits } from "../utils/deductCredits.js";
 
 export const pptAgent = async (state) => {
   try {
+    await deductCredits(state.userId,"ppt")
     const llm = await getModel("ppt");
     const prompt = `You are a professinal presentation designer.
         
@@ -42,7 +43,6 @@ export const pptAgent = async (state) => {
         ${state.prompt}
         `;
     const res = await llm.invoke(prompt);
-    await deductCredits(state.userId,"ppt")
     const data = JSON.parse(res.content);
     const ppt = await generatePpt(data);
     const buffer = await ppt.write({

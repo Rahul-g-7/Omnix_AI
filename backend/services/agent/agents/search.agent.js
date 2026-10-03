@@ -3,10 +3,11 @@ import { deductCredits } from "../utils/deductCredits.js";
 
 export const searchAgent=async (state) => {
     try {
+        await deductCredits(state.userId, "search");
+
         const results=await searchTool.invoke({
             query:state.prompt,
         })
-        await deductCredits(state.userId, "search");
         console.log("results",results)
         return{
             ...state,
