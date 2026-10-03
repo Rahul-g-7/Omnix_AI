@@ -16,7 +16,7 @@ app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(cors({
     credentials:true,
-    origin:process.env.FRONTEND_URl
+    origin:process.env.FRONTEND_URL
 }))
 
 app.get("/", (req, res) => {
