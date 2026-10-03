@@ -39,5 +39,16 @@ export const verifyPayment = async (req, res) => {
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
+      if(generateSignature !== razorpay_signature){
+        return res.status(400).json({ message: "Invalid payment" });
+      }
+      const payment=await Payment.findOne({orderId:razorpay_order_id})
+      if(!payment){
+        return res.status(404).json({ message: "Payment not found" });
+      }
+      payment.paymentId=razorpay_payment_id
+      payment.status="paid"
+      await payment.save()
+      return res.status(200).json({ message: "Payment verified successfully" });
   } catch (error) {}
 };
