@@ -187,10 +187,10 @@ const SideBar = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-semibold text-slate-100 truncate">
-                    {userData?.user?.name || "user"}
+                    {userData?.name || "user"}
                   </p>
                   <p className="text-[11px] text-slate-600 mt-px">
-                    {"Free plan"}
+                    {userData?.plan+" Plan"||"Free plan"}
                   </p>
                 </div>
                 <div className="flex gap-2">

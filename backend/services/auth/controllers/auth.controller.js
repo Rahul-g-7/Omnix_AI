@@ -16,9 +16,10 @@ export const login = async (req, res) => {
       });
     }
 
-    const sessionID = crypto.randomUUID();
+    const sessionId = crypto.randomUUID();
+    await redis.set(`user-session:${user?._id}`,sessionId,"EX",7 * 24 * 60 * 60);
     await redis.set(
-      `session:${sessionID}`,
+      `session:${sessionId}`,
       JSON.stringify({
         userId: user._id,
         name: user.name,
@@ -32,7 +33,7 @@ export const login = async (req, res) => {
       "EX",
       7 * 24 * 60 * 60,
     );
-    res.cookie("session", sessionID, {
+    res.cookie("session", sessionId, {
       httpOnly: true,
       secure: false,
       sameSite: "strict",
@@ -47,11 +48,11 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    const sessionID = req.cookies?.session;
-    if (!sessionID) {
+    const sessionId = req.cookies?.session;
+    if (!sessionId) {
       return res.status(400).json({ message: "no session id" });
     }
-    await redis.del(`session:${sessionID}`);
+    await redis.del(`session:${sessionId}`);
     res.clearCookie("session");
     return res.status(200).json({ message: "logout successful" });
   } catch (error) {
@@ -70,11 +71,11 @@ export const updateUserPayment = async (req, res) => {
     user.plan = plan;
     user.credits += credits;
     user.totalCredits += credits;
-    user.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 1000);
+    user.planExpiresAt = new Date(Date.now() + 30 * 24 * 60 *60* 1000);
     await user.save();
-    const sessionId = req.cookies?.session;
+    const sessionId = await redis.get(`user-session:${user?._id}`);
     await redis.set(
-      `session -${sessionId}`,
+      `session:${sessionId}`,
       JSON.stringify({
         userId: user._id,
         name: user.name,
@@ -91,6 +92,8 @@ export const updateUserPayment = async (req, res) => {
     return res.status(200).json({ success: true });
   } catch (error) {
     console.log("logout error ", error);
-    return res.status(500).json({ message: `update user payment error ${error}` });
+    return res
+      .status(500)
+      .json({ message: `update user payment error ${error}` });
   }
 };

@@ -5,11 +5,15 @@ const paymentScheme= new mongoose.Schema({
         type:String,
         required:true
     },
+    orderId: {
+      type: String,
+      required: true,
+    },
     paymentId:String,
     amount:Number,
     currency:{
         type:String,
-        default:"INT"
+        default:"INR"
     },
     credits:{
         type:Number
