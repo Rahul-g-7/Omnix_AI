@@ -1,11 +1,16 @@
 import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { getModel } from "../config/llmModels.js";
 import { getMemory } from "../config/memory.js";
+
 export const chatAgent = async (state) => {
-  const llm = await getModel("chat");
-  const history =await getMemory(state.conversationId)
-  const searchContext=state.searchResults?` web serach results :${JSON.stringify(state.searchResults)} answer the user using the above search results`:""
-  const systemPrompt = `You are OmnixAI and you are a chat Assitant
+  try {
+    const llm = await getModel("chat");
+    const history = (await getMemory(state.conversationId)) || [];
+    const searchContext = state.searchResults
+      ? ` web serach results :${JSON.stringify(state.searchResults)} answer the user using the above search results`
+      : "";
+
+    const systemPrompt = `You are OmnixAI and you are a chat Assitant
   ${searchContext}
   if searchContext exists:
   -use search results to answer the user query
@@ -26,23 +31,32 @@ export const chatAgent = async (state) => {
   - Use bullet points for lists
   - Use headings for sections
   `;
-    const messages=[
-      new SystemMessage(systemPrompt)
-    ]
-    history.forEach(msg=>{
-      if(msg.role=="user"){
-        messages.push(new HumanMessage(msg.content))
-      }
-      else if(msg.role=="assistant"){
-        messages.push(new AIMessage(msg.content))
-      }
-    })
-    messages.push(new HumanMessage(state.prompt))
-    console.log(messages)
 
-  const response = await llm.invoke(messages);
-  return {
-    ...state,
-    aiResponse: response.content,
-  };
+    const messages = [
+      new SystemMessage(systemPrompt)
+    ];
+
+    history.forEach((msg) => {
+      if (msg.role == "user") {
+        messages.push(new HumanMessage(msg.content));
+      } else if (msg.role == "assistant") {
+        messages.push(new AIMessage(msg.content));
+      }
+    });
+
+    messages.push(new HumanMessage(state.prompt));
+    console.log(messages);
+
+    const response = await llm.invoke(messages);
+    return {
+      ...state,
+      aiResponse: response.content,
+    };
+  } catch (error) {
+    console.error("Error in chatAgent:", error);
+    return {
+      ...state,
+      aiResponse: `Error generating response: ${error.message || error}`,
+    };
+  }
 };

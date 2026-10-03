@@ -1,9 +1,11 @@
 import { getModel } from "../config/llmModels.js";
 
 export const codingAgent = async (state) => {
-  const intentllm = await getModel("intent");
-  const llm = await getModel("coding");
-  const intentRes = await intentllm.invoke(`
+  try {
+    const intentllm = await getModel("intent");
+    const llm = await getModel("coding");
+
+    const intentRes = await intentllm.invoke(`
         Your are an intent classifier.
 
         Return ONLY one owrd of these values.
@@ -19,9 +21,11 @@ export const codingAgent = async (state) => {
         User Request:
         ${state.prompt}
         `);
-  const intent = intentRes.content;
-  if (intent == "CODE_GENERATION") {
-    const prompt = `You are Senior software engineer .
+
+    const intent = intentRes.content?.trim();
+
+    if (intent === "CODE_GENERATION") {
+      const prompt = `You are Senior software engineer .
             generate the requested project.
             Define stack:
             -HTML
@@ -82,30 +86,47 @@ export const codingAgent = async (state) => {
             ${state.prompt}
             `;
 
-    const res = await llm.invoke(prompt);
-    console.log(res.content);
-    let content = res.content.trim();
+      const res = await llm.invoke(prompt);
+      console.log(res.content);
+      let content = res.content.trim();
 
-// Remove markdown code fences if the model adds them
-content = content.replace(/^```json\s*/i, "");
-content = content.replace(/^```\s*/i, "");
-content = content.replace(/\s*```$/i, "");
+      // Remove markdown code fences if the model adds them
+      content = content.replace(/^```json\s*/i, "");
+      content = content.replace(/^```\s*/i, "");
+      content = content.replace(/\s*```$/i, "");
 
-const data = JSON.parse(content);
-    return {
-      ...state,
-      aiResponse: "Code Generated Succesfully.",
-      artifacts: [
-        {
-          id: Date.now(),
-          type: "Project",
-          files: data.files || [],
-          title: state.prompt,
-        },
-      ],
-    };
-  }
-  const res = await llm.invoke(`
+      let data;
+      try {
+        data = JSON.parse(content);
+      } catch (parseError) {
+        console.error(
+          "Failed to parse JSON response from coding agent:",
+          parseError,
+        );
+        // Fallback: Attempt to extract JSON substring if extra text was included
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          data = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error("Model response was not valid JSON.");
+        }
+      }
+
+      return {
+        ...state,
+        aiResponse: "Code Generated Succesfully.",
+        artifacts: [
+          {
+            id: Date.now(),
+            type: "Project",
+            files: data?.files || [],
+            title: state.prompt,
+          },
+        ],
+      };
+    }
+
+    const res = await llm.invoke(`
     ${intent}
     Return Markdown only.
 
@@ -123,10 +144,19 @@ const data = JSON.parse(content);
     ${state.prompt}
     
     `);
-  const data = res.content;
-  return {
-    ...state,
-    aiResponse: data,
-    artifacts: [],
-  };
+
+    const data = res.content;
+    return {
+      ...state,
+      aiResponse: data,
+      artifacts: [],
+    };
+  } catch (error) {
+    console.error("Error in codingAgent:", error);
+    return {
+      ...state,
+      aiResponse: `Error generating response: ${error.message || error}`,
+      artifacts: [],
+    };
+  }
 };

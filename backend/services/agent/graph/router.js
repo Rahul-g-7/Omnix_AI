@@ -1,13 +1,16 @@
 import { getModel } from "../config/llmModels.js";
+
 export const router = async (state) => {
-  if (state.agent && state.agent !== "auto") {
-    return {
-      ...state,
-      agent: state.agent,
-    };
-  }
-  const llm = await getModel("router");
-  const prompt = `You are an intelligent agent router for a multi-agent AI system.
+  try {
+    if (state.agent && state.agent !== "auto") {
+      return {
+        ...state,
+        agent: state.agent,
+      };
+    }
+
+    const llm = await getModel("router");
+    const prompt = `You are an intelligent agent router for a multi-agent AI system.
   
   Available agents:
   -chat
@@ -66,9 +69,20 @@ export const router = async (state) => {
   User Query:
   ${state.prompt}
   `;
-  const response = await llm.invoke(prompt);
-  return {
-    ...state,
-    agent: response.content.trim().toLowerCase(),
-  };
+
+    const response = await llm.invoke(prompt);
+    const selectedAgent = response.content?.trim().toLowerCase();
+    const validAgents = ["chat", "search", "coding", "pdf", "ppt", "vision"];
+
+    return {
+      ...state,
+      agent: validAgents.includes(selectedAgent) ? selectedAgent : "chat",
+    };
+  } catch (error) {
+    console.error("Error in router agent:", error);
+    return {
+      ...state,
+      agent: "chat",
+    };
+  }
 };

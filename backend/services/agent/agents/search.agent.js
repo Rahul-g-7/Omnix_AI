@@ -13,7 +13,7 @@ export const searchAgent=async (state) => {
     } catch (error) {
         return{
             ...state,
-            searchResults:[],
+            searchResults:["failed to search"],
             images:[]
         }
     }
