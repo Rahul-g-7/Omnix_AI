@@ -1,4 +1,5 @@
 import { getModel } from "../config/llmModels.js";
+import { deductCredits } from "../utils/deductCredits.js";
 
 export const codingAgent = async (state) => {
   try {
@@ -87,6 +88,8 @@ export const codingAgent = async (state) => {
             `;
 
       const res = await llm.invoke(prompt);
+      await deductCredits(state.userId, "coding");
+      
       console.log(res.content);
       let content = res.content.trim();
 
@@ -146,6 +149,7 @@ export const codingAgent = async (state) => {
     `);
 
     const data = res.content;
+    await deductCredits(state.userId, "coding");
     return {
       ...state,
       aiResponse: data,

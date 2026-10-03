@@ -1,6 +1,11 @@
-import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
 import { getModel } from "../config/llmModels.js";
 import { getMemory } from "../config/memory.js";
+import { deductCredits } from "../utils/deductCredits.js";
 
 export const chatAgent = async (state) => {
   try {
@@ -32,9 +37,7 @@ export const chatAgent = async (state) => {
   - Use headings for sections
   `;
 
-    const messages = [
-      new SystemMessage(systemPrompt)
-    ];
+    const messages = [new SystemMessage(systemPrompt)];
 
     history.forEach((msg) => {
       if (msg.role == "user") {
@@ -48,6 +51,8 @@ export const chatAgent = async (state) => {
     console.log(messages);
 
     const response = await llm.invoke(messages);
+    await deductCredits(state.userId, "chat");
+
     return {
       ...state,
       aiResponse: response.content,

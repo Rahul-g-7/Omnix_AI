@@ -22,6 +22,9 @@ import {
   setSelectedConversation,
 } from "../redux/conversationSlice";
 import { updateConversation } from "../features/updateConversation";
+import getCurrentUser from "../features/getCurrentUser";
+import { setUserData } from "../redux/userSlice";
+
 const ChatInput = () => {
   const [value, setValue] = useState("");
   const [seletedAgent, setSelectedAgent] = useState("Auto");
@@ -64,6 +67,10 @@ const ChatInput = () => {
         images: data?.images,
       }),
     );
+    const updatedUser = await getCurrentUser();
+    if (updatedUser) {
+      dispatch(setUserData(updatedUser));
+    }
     console.log("data", data);
   };
   const agents = [
