@@ -3,9 +3,12 @@ import { generatePdf } from "../utils/GeneratePdf.js";
 import { getFromS3 } from "../utils/getFromS3.js";
 import { uploadToS3 } from "../utils/uploadToS3.js";
 import { deductCredits } from "../utils/deductCredits.js";
+import { checkAgentLimit } from "../config/agentLimit.js";
 
 export const pdfAgent = async (state) => {
   try {
+        await checkAgentLimit(state.userId,"pdf");
+    
     await deductCredits(state.userId, "pdf");
 
     const llm = await getModel("pdf");
@@ -58,7 +61,7 @@ _Link expires in 24 hours._`,
     console.log("error", error);
     return {
       ...state,
-      aiResponse: "# Error Generating PDF",
+      aiResponse: error?.data?.message || "Failed  to generate PDF",
     };
   }
 };

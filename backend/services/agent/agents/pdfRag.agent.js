@@ -5,8 +5,11 @@ import { vectorStore } from "../config/vectorDb.js";
 import { getModel } from "../config/llmModels.js";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { deductCredits } from "../utils/deductCredits.js";
+import { checkAgentLimit } from "../config/agentLimit.js";
 export const pdfRagAgent = async(state) => {
   try {
+    await checkAgentLimit(state.userId,"pdf");
+    
     await deductCredits(state.userId,"pdf")
     const buffer = fs.readFileSync(state.file.path);
     const pdf = new PDFParse({
@@ -52,7 +55,7 @@ export const pdfRagAgent = async(state) => {
     console.log(error);
     return {
       ...state,
-      aiResponse: `Error :${error.message}`,
+      aiResponse: error?.data?.message || "Failed  to generate response",
     };
   }
   finally{

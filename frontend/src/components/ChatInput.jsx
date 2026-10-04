@@ -33,7 +33,7 @@ const ChatInput = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const fileRef = useRef(null);
   const { selectedConversation } = useSelector((state) => state.conversation);
-  const { messages } = useSelector((state) => state.message);
+  const { messages,isLoading } = useSelector((state) => state.message);
   const dispatch = useDispatch();
   const handleSendMessage = async () => {
     dispatch(setIsLoading(true))
@@ -214,7 +214,7 @@ const ChatInput = () => {
             </button>
           </div>
           <button
-            disabled={value.trim().length === 0}
+            disabled={value.trim().length === 0 && isLoading}
             onClick={handleSendMessage}
             className={`w-8 h-8 rounded-lg flex items-center justify-center border-none cursor-pointer  tranistion-all duration-150 ${value.trim().length === 0 ? "opacity-50 cursor-not-allowed bg-white/[0.2]" : "bg-linear-to-br from-indigo-500 to-violet-700 hover:opacity-90"} text-white p-2`}
           >

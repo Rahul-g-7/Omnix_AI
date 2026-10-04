@@ -1,8 +1,11 @@
+import { checkAgentLimit } from "../config/agentLimit.js";
 import { searchTool } from "../config/tavily.js"
 import { deductCredits } from "../utils/deductCredits.js";
 
 export const searchAgent=async (state) => {
     try {
+        await checkAgentLimit(state.userId,"vision");
+        
         await deductCredits(state.userId, "search");
 
         const results=await searchTool.invoke({
@@ -17,7 +20,8 @@ export const searchAgent=async (state) => {
     } catch (error) {
         return{
             ...state,
-            searchResults:["failed to search"],
+            aiResponse: error?.data?.message || "Failed  to generate search",
+            searchResults:[],
             images:[]
         }
     }

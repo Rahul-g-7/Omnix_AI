@@ -2,9 +2,12 @@ import { getModel } from "../config/llmModels.js";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import fs from "fs/promises";
 import { deductCredits } from "../utils/deductCredits.js";
+import { checkAgentLimit } from "../config/agentLimit.js";
 
 export const imageAnalyzer = async (state) => {
   try {
+    await checkAgentLimit(state.userId,"vision");
+    
     await deductCredits(state.userId,"vision")
     const llm = await getModel("imageAnalyzer");
     const imageBuffer =await fs.readFile(state.file.path);
@@ -42,7 +45,7 @@ export const imageAnalyzer = async (state) => {
     console.error("Error in imageAnalyzer:", error);
     return {
       ...state,
-      aiResponse: `Error analyzing image: ${error.message || error}`,
+      aiResponse: error?.data?.message || "Failed  to generate response",
     };
   } finally {
     await fs.unlink(state.file.path);
