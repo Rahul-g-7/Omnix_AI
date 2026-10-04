@@ -8,6 +8,7 @@ import {
   Paperclip,
   Presentation,
   Send,
+  X,
   Zap,
 } from "lucide-react";
 import React, { useState } from "react";
@@ -55,14 +56,15 @@ const ChatInput = () => {
       );
     }
 
-    const formData=new FormData();
-    formData.append("prompt",value.trim());
-    formData.append("conversationId",conversation?._id);
-    formData.append("agent",seletedAgent.toLowerCase());
-    formData.append("file",selectedFile)
+    const formData = new FormData();
+    formData.append("prompt", value.trim());
+    formData.append("conversationId", conversation?._id);
+    formData.append("agent", seletedAgent.toLowerCase());
+    formData.append("file", selectedFile);
     dispatch(addMessage({ role: "user", content: value.trim() }));
     setValue("");
     const data = await sendMessage(formData);
+    setSelectedFile(null)
     if (data?.artifacts && data.artifacts.length > 0) {
       dispatch(setArtifacts(data.artifacts));
     }
@@ -134,6 +136,39 @@ const ChatInput = () => {
             );
           })}
         </div>
+        {selectedFile && (
+          <div className="my-3">
+            <div className="inline-flex items-center gap-2 rounded-2xl border-white/10 bg-white/[0.04] px-3 py-2">
+              {
+              selectedFile?.type === "application/pdf" ? (
+                <FileText size={16} className="text-red-400" />
+              ) : (
+                selectedFile.type.startsWith("image/") && (
+                  <img
+                    src={URL.createObjectURL(selectedFile)}
+                    className="h-10 w-10 rounded-2xl object-cover mt-3"
+                  />
+                )
+              )}
+              <div className="mt-3">
+              <p className="text-white text-sm">{selectedFile.name} </p>
+              <p className="text-[12px] text-slate-400">
+                {Math.ceil(selectedFile.size / 1000) + " KB"}
+              </p>
+            </div>
+            <button
+              className="ml-2 cursor-pointer"
+              onClick={() => {
+                setSelectedFile(null);
+                fileRef.current.value = "";
+              }}
+            >
+              <X size={14} className="text-slate-400 hover:text-white " />
+            </button>
+            </div>
+            
+          </div>
+        )}
         <textarea
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
@@ -164,7 +199,11 @@ const ChatInput = () => {
               }}
             />
             <button className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/[0.08] hover:text-slate-200 transition-colors duration-150 cursor-pointer">
-              <Paperclip onClick={() => fileRef.current.click()} size={18} className="text-slate-400 " />
+              <Paperclip
+                onClick={() => fileRef.current.click()}
+                size={18}
+                className="text-slate-400 "
+              />
             </button>
             <button className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/[0.08] hover:text-slate-200 transition-colors duration-150 cursor-pointer">
               <Mic size={18} className="text-slate-400 " />
