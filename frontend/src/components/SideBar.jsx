@@ -249,11 +249,12 @@ const SideBar = () => {
             </div>
           </div>
         </div>
-        <BillingDrawer
+        
+      </div>
+      <BillingDrawer
           open={showBilling}
           onclose={() => setShowBilling(false)}
         />
-      </div>
     </>
   );
 };
