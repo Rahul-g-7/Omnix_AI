@@ -45,7 +45,7 @@ export const imageAnalyzer = async (state) => {
     console.error("Error in imageAnalyzer:", error);
     return {
       ...state,
-      aiResponse: error?.data?.message || "Failed  to generate response",
+      aiResponse: error?.data?.message || error?.message || "Failed  to generate response",
     };
   } finally {
     await fs.unlink(state.file.path);

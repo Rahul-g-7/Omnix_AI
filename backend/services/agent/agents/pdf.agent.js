@@ -61,7 +61,7 @@ _Link expires in 24 hours._`,
     console.log("error", error);
     return {
       ...state,
-      aiResponse: error?.data?.message || "Failed  to generate PDF",
+      aiResponse: error?.data?.message || error?.message ||  "Failed  to generate PDF",
     };
   }
 };

@@ -19,7 +19,7 @@ const Artifact = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { artifacts } = useSelector((state) => state.message);
   if (artifacts.length === 0) {
-    return;
+    return null;
   }
 
   const file = artifacts[0]?.files?.[activeFile];
@@ -56,7 +56,6 @@ const Artifact = () => {
     if (name.endsWith(".jsx")) return "javascript";
     if (name.endsWith(".tsx")) return "typescript";
     if (name.endsWith(".json")) return "json";
-    if (name.endsWith(".py")) return "python";
     if (name.endsWith(".java")) return "java";
     if (name.endsWith(".c")) return "c";
     if (name.endsWith(".cpp")) return "cpp";
@@ -123,7 +122,7 @@ const Artifact = () => {
             {tab == "code" && (
               <div className="h-auto flex text-white border-b border-white/[0.06] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden shrink-0">
                 {artifacts[0]?.files?.map((f, index) => (
-                  <button
+                  <button key={f?.name || index}
                     onClick={() => {
                       setActiiveFile(index);
                     }}
@@ -143,7 +142,7 @@ const Artifact = () => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transform={{ duration: 0.15, ease: easeInOut }}
+                  transition={{ duration: 0.15, ease: easeInOut }}
                   className="h-full w-full"
                 >
                   <iframe
@@ -157,7 +156,7 @@ const Artifact = () => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transform={{ duration: 0.15, ease: easeInOut }}
+                  transition={{ duration: 0.15, ease: easeInOut }}
                   className="h-full w-full"
                 >
                   <Editor

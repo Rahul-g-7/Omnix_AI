@@ -71,7 +71,7 @@ const SideBar = () => {
           {conversations.map((conv, i) => {
             const isActive = selectedConversation?._id == conv?._id;
             return (
-              <div
+              <div key={conv?._id || i} 
                 onClick={() => dispatch(setSelectedConversation(conv))}
                 className={`flex items-center gap-2.5  cursor-pointer mb-0.5 px-3 py-2.5 rounded-[10px] border transition-colors duration-150 ${isActive ? "bg-indigo-500/10 border-indigo-500/[0.18]" : "bg-transparent border-transparent"}`}
               >
@@ -242,7 +242,7 @@ const SideBar = () => {
                   </div>
                 </div>
               ) : (
-                <button className="w-full flex items-center justify-center gap-2 text-sm font-medium text-slate-200 bg-white/[0.05] border border-white/[0.08] rounded-xl py-[11px] cursor-pointer hover:bg-white[0.08] transition-colors duration-150">
+                <button className="w-full flex items-center justify-center gap-2 text-sm font-medium text-slate-200 bg-white/[0.05] border border-white/[0.08] rounded-xl py-[11px] cursor-pointer hover:bg-white/[0.08] transition-colors duration-150">
                   login
                 </button>
               )}

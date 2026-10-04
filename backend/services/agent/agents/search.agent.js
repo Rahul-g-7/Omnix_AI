@@ -4,7 +4,7 @@ import { deductCredits } from "../utils/deductCredits.js";
 
 export const searchAgent=async (state) => {
     try {
-        await checkAgentLimit(state.userId,"vision");
+        await checkAgentLimit(state.userId,"search");
         
         await deductCredits(state.userId, "search");
 
@@ -20,7 +20,7 @@ export const searchAgent=async (state) => {
     } catch (error) {
         return{
             ...state,
-            aiResponse: error?.data?.message || "Failed  to generate search",
+            aiResponse: error?.data?.message || error?.message || "Failed  to generate search",
             searchResults:[],
             images:[]
         }

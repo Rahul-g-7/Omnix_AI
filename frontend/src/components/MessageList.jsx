@@ -22,7 +22,7 @@ const MessageList = () => {
                     </div>
                     <div className='flex flex-wrap justify-center gap-2 mt-1'>
                         {["Build a Netlfix clone","Explain Redis","Build a dashboard"].map((s)=>(
-                            <button className='text-[12px] text-slate-400 bg-white/[0.04] cursor-pointer border border-white/[0.07] px-3 py-1.5 rounded-lg hover:bg-white/[0.08] hover:text-slate-200 transition-colors duration-150'>
+                            <button key={s} onClick={() => setValue(s)}  className='text-[12px] text-slate-400 bg-white/[0.04] cursor-pointer border border-white/[0.07] px-3 py-1.5 rounded-lg hover:bg-white/[0.08] hover:text-slate-200 transition-colors duration-150'>
                                 {s}
                             </button>
                         ))}

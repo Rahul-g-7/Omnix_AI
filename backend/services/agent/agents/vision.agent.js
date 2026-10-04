@@ -56,7 +56,7 @@ Link expires in 24 hours.`,
     console.log("error", error);
     return {
       ...state,
-      aiResponse: error?.data?.message || "Failed  to generate image",
+      aiResponse: error?.data?.message || error?.message || "Failed  to generate image",
     };
   }
 };

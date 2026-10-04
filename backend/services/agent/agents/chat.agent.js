@@ -10,8 +10,10 @@ import { checkAgentLimit } from "../config/agentLimit.js";
 
 export const chatAgent = async (state) => {
   try {
-    await checkAgentLimit(state.userId,"chat");
-    await deductCredits(state.userId, "chat");
+    if (!state?.searchResults) {
+      await checkAgentLimit(state.userId, "chat");
+      await deductCredits(state.userId, "chat");
+    }
 
     const llm = await getModel("chat");
     const history = (await getMemory(state.conversationId)) || [];
@@ -64,7 +66,7 @@ export const chatAgent = async (state) => {
     console.error("Error in chatAgent:", error);
     return {
       ...state,
-      aiResponse: error?.data?.message || "Failed  to generate response",
+      aiResponse: error?.data?.message || error?.message || "Failed  to generate response",
     };
   }
 };

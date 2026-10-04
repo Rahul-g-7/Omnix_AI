@@ -43,7 +43,7 @@ const LoadingAnimation = () => {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            transition={{ diration: 0.25, ease: "easeOut" }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
           >
             {label.split("").map((char, i) => (
               <motion.div

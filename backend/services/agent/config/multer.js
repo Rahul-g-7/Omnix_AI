@@ -10,11 +10,11 @@ const storage=multer.diskStorage({
         cb(null,uploadDir)
     },
     filename(req,file,cb){
-        cb(null,`${Date.now}-${file.originalname}`)
+        cb(null,`${Date.now()}-${file.originalname}`)
     }
 })
 
-const fileFile=(req,file,cb)=>{
+const fileFilter=(req,file,cb)=>{
    if(file.mimetype=="application/pdf" || file.mimetype.startsWith("image/")){
     cb(null,true);
    }
@@ -22,6 +22,6 @@ const fileFile=(req,file,cb)=>{
     cb(new Error("Only PDF and Images are allowed."))
    }
 }
-export default multer({storage,fileFile,limits:{
+export default multer({storage,fileFilter,limits:{
     fileSize:1024*1024*20
 }})

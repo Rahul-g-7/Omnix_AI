@@ -15,7 +15,12 @@ import React, { useState } from "react";
 import sendMessage from "../features/sendMessage";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { addMessage, setMessages, setArtifacts, setIsLoading } from "../redux/messageSlice";
+import {
+  addMessage,
+  setMessages,
+  setArtifacts,
+  setIsLoading,
+} from "../redux/messageSlice";
 import { createConversation } from "../features/createConversation";
 import {
   addConversation,
@@ -33,10 +38,11 @@ const ChatInput = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const fileRef = useRef(null);
   const { selectedConversation } = useSelector((state) => state.conversation);
-  const { messages,isLoading } = useSelector((state) => state.message);
+  const { messages, isLoading } = useSelector((state) => state.message);
   const dispatch = useDispatch();
   const handleSendMessage = async () => {
-    dispatch(setIsLoading(true))
+    if (isLoading || (value.trim().length === 0 && !selectedFile)) return;
+    dispatch(setIsLoading(true));
     let conversation = selectedConversation;
     if (!selectedConversation) {
       const conv = await createConversation();
@@ -61,14 +67,14 @@ const ChatInput = () => {
     formData.append("prompt", value.trim());
     formData.append("conversationId", conversation?._id);
     formData.append("agent", seletedAgent.toLowerCase());
-    if(selectedFile){
+    if (selectedFile) {
       formData.append("file", selectedFile);
     }
     dispatch(addMessage({ role: "user", content: value.trim() }));
     setValue("");
     const data = await sendMessage(formData);
-    dispatch(setIsLoading(false))
-    setSelectedFile(null)
+    dispatch(setIsLoading(false));
+    setSelectedFile(null);
     if (data?.artifacts && data.artifacts.length > 0) {
       dispatch(setArtifacts(data.artifacts));
     }
@@ -131,6 +137,7 @@ const ChatInput = () => {
             const Icon = agent.icon;
             return (
               <div
+                key={agent.id}
                 onClick={() => setSelectedAgent(agent.label)}
                 className={`flex-shrink-0  cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border transition-all ${isActive ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white border-transparent shadow-[0_1px_8px_rgb(99,102,241,.35)]" : "bg-white[0.03] text-slate-400 border-white/[0.06] hover:bg-white/[0.07]"}`}
               >
@@ -143,8 +150,7 @@ const ChatInput = () => {
         {selectedFile && (
           <div className="my-3">
             <div className="inline-flex items-center gap-2 rounded-2xl border-white/10 bg-white/[0.04] px-3 py-2">
-              {
-              selectedFile?.type === "application/pdf" ? (
+              {selectedFile?.type === "application/pdf" ? (
                 <FileText size={16} className="text-red-400" />
               ) : (
                 selectedFile.type.startsWith("image/") && (
@@ -155,22 +161,21 @@ const ChatInput = () => {
                 )
               )}
               <div className="mt-3">
-              <p className="text-white text-sm">{selectedFile.name} </p>
-              <p className="text-[12px] text-slate-400">
-                {Math.ceil(selectedFile.size / 1000) + " KB"}
-              </p>
+                <p className="text-white text-sm">{selectedFile.name} </p>
+                <p className="text-[12px] text-slate-400">
+                  {Math.ceil(selectedFile.size / 1000) + " KB"}
+                </p>
+              </div>
+              <button
+                className="ml-2 cursor-pointer"
+                onClick={() => {
+                  setSelectedFile(null);
+                  fileRef.current.value = "";
+                }}
+              >
+                <X size={14} className="text-slate-400 hover:text-white " />
+              </button>
             </div>
-            <button
-              className="ml-2 cursor-pointer"
-              onClick={() => {
-                setSelectedFile(null);
-                fileRef.current.value = "";
-              }}
-            >
-              <X size={14} className="text-slate-400 hover:text-white " />
-            </button>
-            </div>
-            
           </div>
         )}
         <textarea
@@ -178,7 +183,7 @@ const ChatInput = () => {
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              if (value.trim().length > 0) {
+              if (!isLoading && (value.trim().length > 0 || selectedFile)) {
                 handleSendMessage();
               }
             }
@@ -214,9 +219,9 @@ const ChatInput = () => {
             </button>
           </div>
           <button
-            disabled={value.trim().length === 0 && isLoading}
+            disabled={isLoading|| (value.trim().length === 0 && !selectedFile)}
             onClick={handleSendMessage}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center border-none cursor-pointer  tranistion-all duration-150 ${value.trim().length === 0 ? "opacity-50 cursor-not-allowed bg-white/[0.2]" : "bg-linear-to-br from-indigo-500 to-violet-700 hover:opacity-90"} text-white p-2`}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center border-none cursor-pointer  tranistion-all duration-150 ${(isLoading || (value.trim().length === 0 && !selectedFile)) ? "opacity-50 cursor-not-allowed bg-white/[0.2]" : "bg-linear-to-br from-indigo-500 to-violet-700 hover:opacity-90"} text-white p-2`}
           >
             <Send size={18} className="text-white " />
           </button>
