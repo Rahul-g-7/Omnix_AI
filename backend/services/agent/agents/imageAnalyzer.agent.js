@@ -1,15 +1,14 @@
 import { getModel } from "../config/llmModels.js";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import fs from "fs";
+import fs from "fs/promises";
 import { deductCredits } from "../utils/deductCredits.js";
 
 export const imageAnalyzer = async (state) => {
   try {
     await deductCredits(state.userId,"vision")
     const llm = await getModel("imageAnalyzer");
-    const imageBuffer = fs.readFile(state.file.path);
+    const imageBuffer =await fs.readFile(state.file.path);
     const base64 = imageBuffer.toString("base64");
-    const prompt = `Analyze the image and provide insights.`;
     const message = [
       new SystemMessage(
         `You are an intelligent image Analyser agent.
@@ -29,7 +28,7 @@ export const imageAnalyzer = async (state) => {
           { type: "text", text: state.prompt || "analyze the image" },
           {
             type: "image_url",
-            image_url: `data:${state.file.mimetype};base64,${base64Image}`,
+            image_url: `data:${state.file.mimetype};base64,${base64}`,
           },
         ],
       }),
@@ -46,6 +45,6 @@ export const imageAnalyzer = async (state) => {
       aiResponse: `Error analyzing image: ${error.message || error}`,
     };
   } finally {
-    fs.unlink(state.file.path);
+    await fs.unlink(state.file.path);
   }
 };
