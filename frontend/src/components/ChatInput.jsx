@@ -5,13 +5,14 @@ import {
   ImageIcon,
   MessageSquare,
   Mic,
+  MicOff,
   Paperclip,
   Presentation,
   Send,
   X,
   Zap,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import sendMessage from "../features/sendMessage";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
@@ -36,6 +37,59 @@ const ChatInput = () => {
   const [value, setValue] = useState("");
   const [seletedAgent, setSelectedAgent] = useState("Auto");
   const [selectedFile, setSelectedFile] = useState(null);
+
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
+  useEffect(() => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.lang = "en-US";
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+      let transcript = "";
+      for (
+        let index = event?.resultIndex;
+        index < event?.results?.length;
+        index++
+      ) {
+        transcript += event.results[index][0].transcript;
+      }
+      setValue(transcript);
+    };
+    recognition.onstart = () => {
+      console.log("Mic is actively listening...");
+    };
+
+    recognition.onerror = (e) => {
+      console.log("Mic error:", e.error);
+    };
+    recognition.onend = () => {
+      console.log("Mic stopped.");
+      setListening(false);
+    };
+
+    recognitionRef.current = recognition;
+  }, []);
+
+  const toogleMic = () => {
+    if (!recognitionRef.current) {
+      alert("speech recognition not supported in your browser ");
+      return;
+    }
+    if (listening) {
+      recognitionRef.current.stop();
+      setListening(false);
+    } else {
+      recognitionRef.current.start();
+      setListening(true);
+    }
+  };
   const fileRef = useRef(null);
   const { selectedConversation } = useSelector((state) => state.conversation);
   const { messages, isLoading } = useSelector((state) => state.message);
@@ -214,14 +268,18 @@ const ChatInput = () => {
                 className="text-slate-400 "
               />
             </button>
-            <button className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/[0.08] hover:text-slate-200 transition-colors duration-150 cursor-pointer">
-              <Mic size={18} className="text-slate-400 " />
+            <button
+              onClick={toogleMic}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-150 cursor-pointer ${listening? "bg-red-500 text-white":"text-slate-600 hover:bg-white/[0.05]"}`}
+            >
+              {listening?<Mic size={18} className="text-slate-400 " />:<MicOff size={18} className="text-slate-400 " />}
+              
             </button>
           </div>
           <button
-            disabled={isLoading|| (value.trim().length === 0 && !selectedFile)}
+            disabled={isLoading || (value.trim().length === 0 && !selectedFile)}
             onClick={handleSendMessage}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center border-none cursor-pointer  tranistion-all duration-150 ${(isLoading || (value.trim().length === 0 && !selectedFile)) ? "opacity-50 cursor-not-allowed bg-white/[0.2]" : "bg-linear-to-br from-indigo-500 to-violet-700 hover:opacity-90"} text-white p-2`}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center border-none cursor-pointer  tranistion-all duration-150 ${isLoading || (value.trim().length === 0 && !selectedFile) ? "opacity-50 cursor-not-allowed bg-white/[0.2]" : "bg-linear-to-br from-indigo-500 to-violet-700 hover:opacity-90"} text-white p-2`}
           >
             <Send size={18} className="text-white " />
           </button>
