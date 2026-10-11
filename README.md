@@ -3,6 +3,7 @@
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/AWS%20CloudFront-Live%20Demo-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://d3kcob1r6rkhl0.cloudfront.net)
+[![CI/CD Pipeline](https://img.shields.io/badge/GitHub%20Actions-CI%2FCD%20Deployed-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/Rahul-g-7/Omnix_AI/actions/workflows/deploy.yml)
 [![React](https://img.shields.io/badge/React%2019-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite%208-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-Agentic%20AI-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain.com/)
@@ -10,11 +11,12 @@
 [![Redis](https://img.shields.io/badge/Redis-Memory%20%26%20Rate%20Limit-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg?style=for-the-badge)](LICENSE)
 
 **An enterprise-grade, distributed multi-agent AI assistant and interactive developer workspace.**  
-Orchestrated with **LangGraph**, Omnix AI delivers multi-file code generation with live Monaco Editor sandboxing, document synthesis (PDF & PPT), multimodal image analysis, vector-based PDF RAG, real-time speech recognition, live web search, and credit-based subscription billing.
+Orchestrated with **LangGraph**, Omnix AI delivers multi-file code generation with live Monaco Editor sandboxing, document synthesis (PDF & PPT), multimodal image analysis, vector-based PDF RAG, real-time speech recognition, live web search, credit-based subscription billing, and a fully automated CI/CD pipeline deploying to AWS ECS and CloudFront.
 
-[🚀 Explore Live Application](https://d3kcob1r6rkhl0.cloudfront.net) • [🏗️ System Architecture](#-system-architecture) • [🤖 Multi-Agent Workflow](#-multi-agent-orchestration-langgraph) • [🐳 Docker & Local Setup](#-getting-started--local-setup) • [📡 API Reference](#-api-reference)
+[🚀 Explore Live Application](https://d3kcob1r6rkhl0.cloudfront.net) • [🏗️ System Architecture](#-system-architecture) • [🤖 Multi-Agent Workflow](#-multi-agent-orchestration-langgraph) • [🔄 CI/CD & Automated Deployment](#-cicd--automated-cloud-deployment) • [🐳 Docker & Local Setup](#-getting-started--local-setup) • [📡 API Reference](#-api-reference)
 
 </div>
 
@@ -22,11 +24,12 @@ Orchestrated with **LangGraph**, Omnix AI delivers multi-file code generation wi
 
 ## 🌐 Live AWS Deployment
 
-The Omnix AI production frontend is deployed globally on **AWS CloudFront** edge infrastructure backed by **AWS S3**:
+The Omnix AI production platform is deployed globally on **AWS CloudFront** edge infrastructure backed by **AWS S3** and **AWS ECS Fargate**:
 
 - 🔗 **Production URL:** [https://d3kcob1r6rkhl0.cloudfront.net](https://d3kcob1r6rkhl0.cloudfront.net)
 - 🔒 **Edge Security:** Global SSL/TLS termination, HTTP-only cross-origin sessions (`SameSite=None`, `Secure=true`), and CORS-protected API Gateway proxy routing.
 - 📦 **Artifact Delivery:** High-speed cloud asset streaming with AWS S3 presigned URLs (24-hour expiration) for synthesized PDFs, PowerPoint decks, and AI-generated imagery.
+- ⚡ **Continuous Delivery:** Automated GitHub Actions pipeline builds Docker containers, pushes to Amazon ECR, triggers rolling ECS Fargate deployments, and syncs frontend assets to S3 with CloudFront cache invalidation.
 
 ---
 
@@ -44,7 +47,7 @@ The Omnix AI production frontend is deployed globally on **AWS CloudFront** edge
   - [4. Agent Service (Port 8003)](#4-agent-service-port-8003)
   - [5. Billing Service (Port 8004)](#5-billing-service-port-8004)
 - [Specialized Capabilities](#-specialized-capabilities)
-  - [🎙️ Real-Time Speech-to-Text Recognition](#-real-time-speech-to-text-recognition)
+  - [🎙️ Real-Time Speech-to-Text Recognition](#️-real-time-speech-to-text-recognition)
   - [💻 Multi-File Code Sandbox & Monaco Editor](#-multi-file-code-sandbox--monaco-editor)
   - [📄 Document RAG Pipeline (Qdrant + Gemini Embeddings)](#-document-rag-pipeline-qdrant--gemini-embeddings)
   - [👁️ Multimodal Vision & Image Analysis](#️-multimodal-vision--image-analysis)
@@ -52,6 +55,10 @@ The Omnix AI production frontend is deployed globally on **AWS CloudFront** edge
   - [🌐 Live Web Intelligence (Tavily)](#-live-web-intelligence-tavily)
 - [Session Management, Security & Rate Limiting](#-session-management-security--rate-limiting)
 - [Billing, Plans & Credit Economics](#-billing-plans--credit-economics)
+- [🔄 CI/CD & Automated Cloud Deployment](#-cicd--automated-cloud-deployment)
+  - [GitHub Actions Pipeline Architecture](#github-actions-pipeline-architecture)
+  - [Workflow Stages Breakdown (`deploy.yml`)](#workflow-stages-breakdown-deployyml)
+  - [Required GitHub Secrets & Variables](#required-github-secrets--variables)
 - [Tech Stack](#-tech-stack)
 - [Repository Structure](#-repository-structure)
 - [Getting Started & Local Setup](#-getting-started--local-setup)
@@ -59,7 +66,6 @@ The Omnix AI production frontend is deployed globally on **AWS CloudFront** edge
   - [Option A: Running with Docker](#option-a-running-with-docker)
   - [Option B: Manual Local Setup](#option-b-manual-local-setup)
   - [Environment Variables Configuration](#environment-variables-configuration)
-- [AWS Cloud Deployment Guide](#-aws-cloud-deployment-guide)
 - [API Reference](#-api-reference)
 - [License](#-license)
 
@@ -77,7 +83,8 @@ The Omnix AI production frontend is deployed globally on **AWS CloudFront** edge
 - 🧠 **Dual Memory Architecture:** High-speed sliding memory window in Redis (last 20 messages, 24h TTL) combined with persistent MongoDB conversation thread history.
 - 🛡️ **Sliding Window Rate Limiter:** Per-user, per-agent request throttling enforced via Redis with exact retry timestamps (`retryAfter`).
 - 💳 **Production Credit Economy:** Multi-tier subscriptions backed by Razorpay payments and cryptographic HMAC SHA-256 signature verification.
-- 🐳 **Containerized Microservices:** Dockerfiles provided for all services alongside Docker Compose for scalable deployments.
+- 🔄 **Fully Automated CI/CD:** Production deployment automated end-to-end via GitHub Actions pushing Docker images to Amazon ECR, updating AWS ECS Fargate services, and syncing static assets to S3 and CloudFront.
+- 🐳 **Containerized Microservices:** Production Dockerfiles provided for all services alongside Docker Compose for scalable deployments.
 
 ---
 
@@ -262,6 +269,94 @@ flowchart TD
 
 ---
 
+## 🔄 CI/CD & Automated Cloud Deployment
+
+Omnix AI features an automated continuous integration and continuous deployment (CI/CD) pipeline implemented with **GitHub Actions** (`.github/workflows/deploy.yml`).
+
+Every push to the `main` branch (or manual trigger via `workflow_dispatch`) automatically tests, builds, and deploys both backend microservices and the frontend client without downtime.
+
+### GitHub Actions Pipeline Architecture
+
+```mermaid
+flowchart TD
+    Trigger(["Git Push to 'main' / Workflow Dispatch"]) --> BackendJob["Job 1: deploy-backend (ubuntu-latest)"]
+
+    subgraph Backend_Pipeline ["Backend CI/CD Pipeline"]
+        BackendJob --> Checkout1["1. actions/checkout@v4"]
+        Checkout1 --> AWSAuth1["2. aws-actions/configure-aws-credentials@v4"]
+        AWSAuth1 --> ECRLogin["3. aws-actions/amazon-ecr-login@v2"]
+
+        ECRLogin --> BuildImages["4. Build Docker Images\n(Gateway, Auth, Chat, Agent, Billing)"]
+        BuildImages --> TagImages["5. Tag Images for Amazon ECR\n(:latest tag)"]
+        TagImages --> PushImages["6. Push Images to Amazon ECR Registries"]
+
+        PushImages --> DeployECS["7. Zero-Downtime Rolling Update\n(aws ecs update-service --force-new-deployment)\n• gateway\n• auth-service\n• chat-service\n• agent-service\n• billing-service"]
+    end
+
+    DeployECS --> FrontendJob["Job 2: deploy-frontend (needs: deploy-backend)"]
+
+    subgraph Frontend_Pipeline ["Frontend CI/CD Pipeline"]
+        FrontendJob --> Checkout2["1. actions/checkout@v4"]
+        Checkout2 --> ViteBuild["2. npm install & npm run build (Vite 8)"]
+        ViteBuild --> AWSAuth2["3. aws-actions/configure-aws-credentials@v4"]
+        AWSAuth2 --> S3Sync["4. Sync dist/ to AWS S3 Bucket\n(aws s3 sync frontend/dist s3://$S3_BUCKET --delete)"]
+        S3Sync --> CloudFrontInvalidate["5. Invalidate CloudFront CDN Cache\n(aws cloudfront create-invalidation --paths '/*')"]
+    end
+
+    CloudFrontInvalidate --> Success(["🎉 Global Production Deployment Live\nhttps://d3kcob1r6rkhl0.cloudfront.net"])
+```
+
+### Workflow Stages Breakdown (`deploy.yml`)
+
+#### 1. `deploy-backend` Job
+1. **Repository Checkout:** Clones the latest commit from `main`.
+2. **AWS Credential Configuration:** Configures AWS CLI and SDK credentials using GitHub repository secrets (`AWS_ACCESS_KEY`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`).
+3. **Amazon ECR Authentication:** Authenticates Docker client against private Amazon ECR registries via `aws-actions/amazon-ecr-login@v2`.
+4. **Container Build & Tagging:** Builds production Docker images for all 5 services using the root `backend` context:
+   - `gateway` (`backend/gateway/Dockerfile`)
+   - `auth-service` (`backend/services/auth/Dockerfile`)
+   - `chat-service` (`backend/services/chat/Dockerfile`)
+   - `agent-service` (`backend/services/agent/Dockerfile`)
+   - `billing-service` (`backend/services/billing/Dockerfile`)
+5. **Image Push to ECR:** Tags and pushes containers to Amazon ECR under `$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/<service>:latest`.
+6. **ECS Rolling Service Updates:** Triggers rolling deployments on AWS ECS Fargate via:
+   ```bash
+   aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER }} --service ${{ secrets.ECS_<SERVICE>_SERVICE }} --force-new-deployment
+   ```
+
+#### 2. `deploy-frontend` Job
+1. **Dependency on Backend:** Defined with `needs: deploy-backend` to ensure backend APIs are operational before releasing frontend updates.
+2. **Optimized Build:** Runs `npm install` and compiles the production bundle via `npm run build` using Vite 8.
+3. **S3 Static Asset Sync:** Syncs the built `frontend/dist` directory to the target AWS S3 bucket:
+   ```bash
+   aws s3 sync frontend/dist s3://${{ secrets.S3_BUCKET }} --delete
+   ```
+4. **CloudFront Cache Invalidation:** Flushes edge server cache across all global Points of Presence (PoPs):
+   ```bash
+   aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+   ```
+
+### Required GitHub Secrets & Variables
+
+To enable the deployment workflow, configure the following secrets in your GitHub repository (**Settings > Secrets and variables > Actions > Repository secrets**):
+
+| Secret Name | Description | Example / Format |
+| :--- | :--- | :--- |
+| `AWS_REGION` | AWS Region where resources are hosted | `us-east-1` / `ap-south-1` |
+| `AWS_ACCOUNT_ID` | 12-digit AWS Account ID for ECR registry URI | `123456789012` |
+| `AWS_ACCESS_KEY` | IAM Access Key ID with ECS, ECR, S3, and CloudFront permissions | `AKIAIOSFODNN7EXAMPLE` |
+| `AWS_SECRET_ACCESS_KEY` | IAM Secret Access Key | `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY` |
+| `ECS_CLUSTER` | Name of the AWS ECS Cluster | `omnix-cluster` |
+| `ECS_GATEWAY_SERVICE` | Name of the Gateway service in ECS | `gateway-service` |
+| `ECS_AUTH_SERVICE` | Name of the Auth service in ECS | `auth-service` |
+| `ECS_CHAT_SERVICE` | Name of the Chat service in ECS | `chat-service` |
+| `ECS_AGENT_SERVICE` | Name of the Agent service in ECS | `agent-service` |
+| `ECS_BILLING_SERVICE` | Name of the Billing service in ECS | `billing-service` |
+| `S3_BUCKET` | AWS S3 Bucket hosting the frontend build | `omnix-ai-frontend-bucket` |
+| `CLOUDFRONT_DISTRIBUTION_ID` | AWS CloudFront Distribution ID for edge caching | `E1A2B3C4D5E6F7` |
+
+---
+
 ## 🚀 Tech Stack
 
 ### Frontend Client
@@ -288,7 +383,7 @@ flowchart TD
 - **Cloud Storage:** AWS SDK for JavaScript v3 (`@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`)
 - **Payment Gateway:** Razorpay SDK (`razorpay`) + Crypto HMAC SHA-256
 - **Database & Cache:** MongoDB Atlas via Mongoose 9, Redis via `ioredis`
-- **Containerization:** Docker & Docker Compose
+- **Containerization & CI/CD:** Docker, Docker Compose, GitHub Actions, Amazon ECR, AWS ECS Fargate, AWS S3, AWS CloudFront
 
 ---
 
@@ -296,8 +391,11 @@ flowchart TD
 
 ```text
 Omnix_AI/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml                  # GitHub Actions CI/CD Pipeline (ECR, ECS Fargate, S3, CloudFront)
 ├── backend/
-│   ├── docker-compose.yml              # Local container orchestration (Redis, services)
+│   ├── docker-compose.yml              # Local container orchestration (Redis)
 │   ├── package.json                    # Backend shared dependencies (ioredis)
 │   ├── shared/
 │   │   └── redis/
@@ -415,33 +513,38 @@ Omnix_AI/
 
 ### Option A: Running with Docker
 
-All microservices include production Dockerfiles. To build and run individual services:
+All microservices include production Dockerfiles. The Docker build context for all backend services is the `backend/` directory so that shared modules (`shared/redis/redis.js`) and dependencies are included.
 
 ```bash
-# Start Redis
+# 1. Start Redis
 cd backend
 docker compose up -d
 
-# Build and run Gateway
-docker build -t omnix-gateway -f gateway/Dockerfile .
-docker run -p 8000:8000 --env-file gateway/.env omnix-gateway
+# 2. Build and run Gateway (from backend directory)
+docker build -t gateway -f gateway/Dockerfile .
+docker run -p 8000:8000 --env-file gateway/.env gateway
 
-# Build and run Auth Service
-docker build -t omnix-auth -f services/auth/Dockerfile .
-docker run -p 8001:8001 --env-file services/auth/.env omnix-auth
+# 3. Build and run Auth Service
+docker build -t auth-service -f services/auth/Dockerfile .
+docker run -p 8001:8001 --env-file services/auth/.env auth-service
 
-# Build and run Chat Service
-docker build -t omnix-chat -f services/chat/Dockerfile .
-docker run -p 8002:8002 --env-file services/chat/.env omnix-chat
+# 4. Build and run Chat Service
+docker build -t chat-service -f services/chat/Dockerfile .
+docker run -p 8002:8002 --env-file services/chat/.env chat-service
 
-# Build and run Agent Service
-docker build -t omnix-agent -f services/agent/Dockerfile .
-docker run -p 8003:8003 --env-file services/agent/.env omnix-agent
+# 5. Build and run Agent Service
+docker build -t agent-service -f services/agent/Dockerfile .
+docker run -p 8003:8003 --env-file services/agent/.env agent-service
 
-# Build and run Billing Service
-docker build -t omnix-billing -f services/billing/Dockerfile .
-docker run -p 8004:8004 --env-file services/billing/.env omnix-billing
+# 6. Build and run Billing Service
+docker build -t billing-service -f services/billing/Dockerfile .
+docker run -p 8004:8004 --env-file services/billing/.env billing-service
 ```
+
+> **Note:** When building from the repository root (as performed in GitHub Actions), use:
+> ```bash
+> docker build -f backend/gateway/Dockerfile -t gateway backend
+> ```
 
 ---
 
@@ -574,32 +677,6 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 ```
-
----
-
-## ☁️ AWS Cloud Deployment Guide
-
-The Omnix AI frontend is deployed on **AWS CloudFront** edge distribution:
-
-### 1. Frontend Build & S3 / CloudFront Deployment
-```bash
-# 1. Build the production bundle
-cd frontend
-npm run build
-
-# 2. Upload dist artifacts to AWS S3 bucket
-aws s3 sync dist/ s3://your-frontend-s3-bucket --delete
-
-# 3. Invalidate CloudFront CDN cache
-aws cloudFront create-invalidation --distribution-id YOUR_DISTRIBUTION_ID --paths "/*"
-```
-
-Live Distribution: [https://d3kcob1r6rkhl0.cloudfront.net](https://d3kcob1r6rkhl0.cloudfront.net)
-
-### 2. Backend Microservices Deployment
-- Container images built from the respective service `Dockerfile`s can be deployed to **AWS ECS (Fargate)** or an **EC2** instance running Docker Compose.
-- Ensure the API Gateway `FRONTEND_URL` environment variable matches `https://d3kcob1r6rkhl0.cloudfront.net` to enable secure CORS credential exchange.
-- Session cookies are transmitted with `SameSite=None` and `Secure=true` for cross-origin HTTPS communication.
 
 ---
 
