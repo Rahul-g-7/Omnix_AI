@@ -2,8 +2,7 @@ name: OmnixAI deployment
 
 on:
   push:
-    branches:
-      -main
+    branches: -main
 
 evn:
   AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -13,7 +12,151 @@ jobs:
   deploy-backend:
     runs-on: ubuntu-latest
     steps:
-      name: Checkout
-      uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v6
 
-      name: aws configure
+      - name: aws configure
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ${{env.AWS_REGION}}
+
+
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v6
+
+
+      - name: Build Gateway
+        run: |
+          docker build \
+          -f backend/gateway/Dockerfile \
+          -t gateway backend
+
+      - name: tag Gateway
+        run: |
+          docker tag gateway:latest \
+          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/gateway:latest
+
+      - name: push Gateway
+        run: |
+          docker push \
+          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/gateway:latest
+
+
+
+      - name: Build Auth
+        run: |
+          docker build \
+          -f backend/services/auth/Dockerfile \
+          -t auth-service backend
+
+      - name: tag Auth
+        run: |
+          docker tag auth-service:latest \
+          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/auth-service:latest
+
+      - name: push Auth
+        run: |
+          docker push \
+          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/auth-service:latest
+
+
+
+      - name: Build Chat
+        run: |
+          docker build \
+          -f backend/services/chat/Dockerfile \
+          -t chat-service backend
+
+      - name: tag Chat
+        run: |
+          docker tag chat-service:latest \
+          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/chat-service:latest
+
+      - name: push Chat
+        run: |
+          docker push \
+          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/chat-service:latest
+
+
+
+      - name: Build Agent
+        run: |
+          docker build \
+          -f backend/services/agent/Dockerfile \
+          -t agent-service backend
+
+      - name: tag Agent
+        run: |
+          docker tag agent-service:latest \
+          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/agent-service:latest
+
+      - name: push Agent
+        run: |
+          docker push \
+          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/agent-service:latest
+
+
+
+      - name: Build Billing
+        run: |
+          docker build \
+          -f backend/services/billing/Dockerfile \
+          -t billing-service backend
+
+      - name: tag Billing
+        run: |
+          docker tag billing-service:latest \
+          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/billing-service:latest
+
+      - name: push Billing
+        run: |
+          docker push \
+          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/billing-service:latest
+
+
+
+      - name: deploy gateway
+        run: |
+          aws ecs update-service \
+          --cluster ${{secrets.ECS_CLUSTER}} \
+          --service ${{secrets.ECS_GATEWAY_SERVICE}} \
+          --force-new-deployment
+
+
+      - name: deploy Auth
+        run: |
+          aws ecs update-service \
+          --cluster ${{secrets.ECS_CLUSTER}} \
+          --service ${{secrets.ECS_AUTH_SERVICE}} \
+          --force-new-deployment
+
+      - name: deploy chat
+        run: |
+          aws ecs update-service \
+          --cluster ${{secrets.ECS_CLUSTER}} \
+          --service ${{secrets.ECS_CHAT_SERVICE}} \
+          --force-new-deployment  
+
+
+      - name: deploy Agent
+        run: |
+          aws ecs update-service \
+          --cluster ${{secrets.ECS_CLUSTER}} \
+          --service ${{secrets.ECS_AGENT_SERVICE}} \
+          --force-new-deployment 
+
+
+      - name: deploy Billing
+        run: |
+          aws ecs update-service \
+          --cluster ${{secrets.ECS_CLUSTER}} \
+          --service ${{secrets.ECS_BILLING_SERVICE}} \
+          --force-new-deployment
+
+
+
+
