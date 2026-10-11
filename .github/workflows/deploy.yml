@@ -2,32 +2,31 @@ name: OmnixAI deployment
 
 on:
   push:
-    branches: -main
+    branches:
+      - main
+  workflow_dispatch:
 
-evn:
+env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID}}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
 jobs:
   deploy-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: aws configure
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
-          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          aws-region: ${{env.AWS_REGION}}
-
-
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v6
-
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Gateway
         run: |
@@ -45,8 +44,6 @@ jobs:
           docker push \
           $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/gateway:latest
 
-
-
       - name: Build Auth
         run: |
           docker build \
@@ -62,8 +59,6 @@ jobs:
         run: |
           docker push \
           $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/auth-service:latest
-
-
 
       - name: Build Chat
         run: |
@@ -81,8 +76,6 @@ jobs:
           docker push \
           $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/chat-service:latest
 
-
-
       - name: Build Agent
         run: |
           docker build \
@@ -98,8 +91,6 @@ jobs:
         run: |
           docker push \
           $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/agent-service:latest
-
-
 
       - name: Build Billing
         run: |
@@ -117,80 +108,70 @@ jobs:
           docker push \
           $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/billing-service:latest
 
-
-
       - name: deploy gateway
         run: |
           aws ecs update-service \
-          --cluster ${{secrets.ECS_CLUSTER}} \
-          --service ${{secrets.ECS_GATEWAY_SERVICE}} \
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.ECS_GATEWAY_SERVICE }} \
           --force-new-deployment
-
 
       - name: deploy Auth
         run: |
           aws ecs update-service \
-          --cluster ${{secrets.ECS_CLUSTER}} \
-          --service ${{secrets.ECS_AUTH_SERVICE}} \
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.ECS_AUTH_SERVICE }} \
           --force-new-deployment
 
       - name: deploy chat
         run: |
           aws ecs update-service \
-          --cluster ${{secrets.ECS_CLUSTER}} \
-          --service ${{secrets.ECS_CHAT_SERVICE}} \
-          --force-new-deployment  
-
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.ECS_CHAT_SERVICE }} \
+          --force-new-deployment
 
       - name: deploy Agent
         run: |
           aws ecs update-service \
-          --cluster ${{secrets.ECS_CLUSTER}} \
-          --service ${{secrets.ECS_AGENT_SERVICE}} \
-          --force-new-deployment 
-
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.ECS_AGENT_SERVICE }} \
+          --force-new-deployment
 
       - name: deploy Billing
         run: |
           aws ecs update-service \
-          --cluster ${{secrets.ECS_CLUSTER}} \
-          --service ${{secrets.ECS_BILLING_SERVICE}} \
+          --cluster ${{ secrets.ECS_CLUSTER }} \
+          --service ${{ secrets.ECS_BILLING_SERVICE }} \
           --force-new-deployment
 
-
-
-          
   deploy-frontend:
-      needs: deploy-backend
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v6
+    needs: deploy-backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-        - name: build frontend
-          run: |
-            cd frontend
-            npm install
-            npm run build
-        - name: aws configure
-          uses: aws-actions/configure-aws-credentials@v6
-          with:
-            aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
-            aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-            aws-region: ${{env.AWS_REGION}}
+      - name: build frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
 
+      - name: aws configure
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-        - name: upload to S3
-          run: |
-            aws s3 sync \
-            frontend/dist \
-            s3://${{secrets.S3_BUCKET}} \
-            --delete
+      - name: upload to S3
+        run: |
+          aws s3 sync \
+          frontend/dist \
+          s3://${{ secrets.S3_BUCKET }} \
+          --delete
 
-
-        - name: invalidate cloudfront
-          run: |
-            aws cloudfront create-invalidation \
-            --distribution-id \
-            ${{secrets.CLOUDFRONT_DISTRIBUTION_ID}} \
-            --paths "/*"
+      - name: invalidate cloudfront
+        run: |
+          aws cloudfront create-invalidation \
+          --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+          --paths "/*"
