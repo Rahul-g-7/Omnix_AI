@@ -159,4 +159,38 @@ jobs:
 
 
 
+          
+  deploy-frontend:
+      needs: deploy-backend
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v6
 
+        - name: build frontend
+          run: |
+            cd frontend
+            npm install
+            npm run build
+        - name: aws configure
+          uses: aws-actions/configure-aws-credentials@v6
+          with:
+            aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
+            aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+            aws-region: ${{env.AWS_REGION}}
+
+
+        - name: upload to S3
+          run: |
+            aws s3 sync \
+            frontend/dist \
+            s3://${{secrets.S3_BUCKET}} \
+            --delete
+
+
+        - name: invalidate cloudfront
+          run: |
+            aws cloudfront create-invalidation \
+            --distribution-id \
+            ${{secrets.CLOUDFRONT_DISTRIBUTION_ID}} \
+            --paths "/*"
